@@ -10,7 +10,7 @@ ENTITY bouncy_ball IS
 		pixel_row, pixel_column		: IN std_logic_vector(9 DOWNTO 0);
 		mouse_x, mouse_y			: IN std_logic_vector(9 DOWNTO 0);
 		mouse_left, mouse_right		: IN std_logic;
-		red, green, blue 			: OUT std_logic
+		red, green, blue 			: OUT std_logic_vector(3 DOWNTO 0)
 	);
 END bouncy_ball;
 
@@ -53,10 +53,10 @@ BEGIN
 
 
 	-- Colours for pixel data on video signal
-	-- Changing the background and ball colour by pushbuttons (active low)
-	Red <= pb1;
-	Green <= (not pb2) and (not ball_on);
-	Blue <=  not ball_on;
+	-- Use 4-bit color values so the VGA DAC gets a proper intensity range.
+	Red <= x"F" WHEN ball_on = '1' ELSE x"0";
+	Green <= x"8" WHEN (ball_on = '1' AND pb1 = '1') ELSE x"0";
+	Blue <= x"8" WHEN (ball_on = '1' AND pb2 = '1') ELSE x"0";
 
 
 	Move_Ball: process (vert_sync)

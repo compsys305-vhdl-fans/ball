@@ -52,17 +52,17 @@ ARCHITECTURE rtl OF top IS
     SIGNAL key1_pressed : STD_LOGIC;
     SIGNAL key2_pressed : STD_LOGIC;
 
-    SIGNAL ball_red   : STD_LOGIC;
-    SIGNAL ball_green : STD_LOGIC;
-    SIGNAL ball_blue  : STD_LOGIC;
+    SIGNAL ball_red   : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL ball_green : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL ball_blue  : STD_LOGIC_VECTOR(3 DOWNTO 0);
 
-    SIGNAL red_sig   : STD_LOGIC;
-    SIGNAL green_sig : STD_LOGIC;
-    SIGNAL blue_sig  : STD_LOGIC;
+    SIGNAL red_sig   : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL green_sig : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL blue_sig  : STD_LOGIC_VECTOR(3 DOWNTO 0);
 
-    SIGNAL vga_red_1   : STD_LOGIC;
-    SIGNAL vga_green_1 : STD_LOGIC;
-    SIGNAL vga_blue_1  : STD_LOGIC;
+    SIGNAL vga_red_4   : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL vga_green_4 : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL vga_blue_4  : STD_LOGIC_VECTOR(3 DOWNTO 0);
     SIGNAL vga_vsync_1 : STD_LOGIC;
 
     -- Per-pixel masks for overlays drawn on top of the ball scene.
@@ -359,13 +359,13 @@ BEGIN
     PROCESS (ball_red, ball_green, ball_blue, player_on, title_on, left_btn, right_btn) BEGIN
         -- Overlay order: title first, then mouse cursor, then the ball/background scene.
         IF title_on = '1' THEN
-            red_sig <= '1';
-            green_sig <= '1';
-            blue_sig <= '1';
+            red_sig <= x"F";
+            green_sig <= x"F";
+            blue_sig <= x"F";
         ELSIF player_on = '1' THEN
-            red_sig <= '1';
-            green_sig <= left_btn;
-            blue_sig <= right_btn;
+            red_sig <= x"F";
+            green_sig <= (OTHERS => left_btn);
+            blue_sig <= (OTHERS => right_btn);
         ELSE
             red_sig <= ball_red;
             green_sig <= ball_green;
@@ -379,9 +379,9 @@ BEGIN
             r_in        => red_sig,
             g_in        => green_sig,
             b_in        => blue_sig,
-            r_out       => vga_red_1,
-            g_out       => vga_green_1,
-            b_out       => vga_blue_1,
+            r_out       => vga_red_4,
+            g_out       => vga_green_4,
+            b_out       => vga_blue_4,
             hsync       => VGA_HS,
             vsync       => vga_vsync_1,
             in_screen   => OPEN,
@@ -390,10 +390,10 @@ BEGIN
 
     VGA_VS <= vga_vsync_1;
 
-    -- The project uses one color bit internally; fan it out to the 4 VGA pins.
-    VGA_R <= (OTHERS => vga_red_1);
-    VGA_G <= (OTHERS => vga_green_1);
-    VGA_B <= (OTHERS => vga_blue_1);
+    -- Drive the full 4-bit VGA DAC.
+    VGA_R <= vga_red_4;
+    VGA_G <= vga_green_4;
+    VGA_B <= vga_blue_4;
 
     -- Debug display: low nibbles of mouse X/Y, KEY3 mode, and switch state.
     HEX0 <= hex7seg(mouse_col(3 DOWNTO 0));
