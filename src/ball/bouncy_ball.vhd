@@ -53,7 +53,7 @@ BEGIN
 
 
 	-- Colours for pixel data on video signal
-	-- Changing the background and ball colour by pushbuttons
+	-- Changing the background and ball colour by pushbuttons (active low)
 	Red <= pb1;
 	Green <= (not pb2) and (not ball_on);
 	Blue <=  not ball_on;
