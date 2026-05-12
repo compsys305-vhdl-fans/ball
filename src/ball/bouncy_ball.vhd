@@ -1,7 +1,7 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.all;
-USE  IEEE.STD_LOGIC_ARITH.all;
-USE  IEEE.STD_LOGIC_SIGNED.all;
+USE IEEE.STD_LOGIC_ARITH.all;
+USE IEEE.STD_LOGIC_SIGNED.all;
 
 
 ENTITY bouncy_ball IS
@@ -20,7 +20,7 @@ architecture behavior of bouncy_ball is
 	SIGNAL prev_mouse_left	: std_logic := '0';
 	SIGNAL size 			: std_logic_vector(9 DOWNTO 0);  
 	SIGNAL ball_y_pos		: std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(240,10);
-	SiGNAL ball_x_pos		: std_logic_vector(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(590,11);
+	SIGNAL ball_x_pos		: std_logic_vector(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(590,11);
 	SIGNAL ball_y_motion	: std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(2,10);
 	SIGNAL ball_x_motion	: std_logic_vector(10 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL random_bits		: std_logic_vector(7 DOWNTO 0) := "10101101";
