@@ -1,39 +1,65 @@
-#============================================================
-# Build by Terasic V1.0.0
-#============================================================
+# -------------------------------------------------------------------------- #
+#
+# Copyright (C) 2018  Intel Corporation. All rights reserved.
+# Your use of Intel Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Intel Program License 
+# Subscription Agreement, the Intel Quartus Prime License Agreement,
+# the Intel FPGA IP License Agreement, or other applicable license
+# agreement, including, without limitation, that your use is for
+# the sole purpose of programming logic devices manufactured by
+# Intel and sold by Intel or its authorized distributors.  Please
+# refer to the applicable agreement for further details.
+#
+# -------------------------------------------------------------------------- #
+#
+# Quartus Prime
+# Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+# Date created = 15:54:38  May 12, 2026
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		top_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus Prime software
+#    and any changes you make may be lost or overwritten.
+#
+# -------------------------------------------------------------------------- #
 
 
 set_global_assignment -name FAMILY "Cyclone V"
 set_global_assignment -name DEVICE 5CEBA4F23C7
-set_global_assignment -name TOP_LEVEL_ENTITY "top"
-set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13
-set_global_assignment -name LAST_QUARTUS_VERSION 14.0
-set_global_assignment -name PROJECT_CREATION_TIME_DATE "MON MAY  5 11:54:18 2014"
-
-
-#============================================================
-# CLOCK2
-#============================================================
+set_global_assignment -name TOP_LEVEL_ENTITY top
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 18.1.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "15:54:38  MAY 12, 2026"
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name BOARD "DE0-CV Development Board"
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name VHDL_FILE ../src/top.vhd
+set_global_assignment -name VHDL_FILE ../src/ball/bouncy_ball.vhd
+set_global_assignment -name VHDL_FILE ../src/hardware/src/vga.vhd
+set_global_assignment -name VHDL_FILE ../src/hardware/src/mouse.vhd
+set_global_assignment -name VHDL_FILE ../project_config/types.vhd -library PROJECT_CONFIG
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLOCK2_50
-
-#============================================================
-# CLOCK3
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLOCK3_50
-
-#============================================================
-# CLOCK4
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLOCK4_50
-
-#============================================================
-# CLOCK
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CLOCK_50
-
-#============================================================
-# DRAM
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to DRAM_ADDR[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to DRAM_ADDR[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to DRAM_ADDR[2]
@@ -73,10 +99,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to DRAM_LDQM
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to DRAM_RAS_N
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to DRAM_UDQM
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to DRAM_WE_N
-
-#============================================================
-# GPIO
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO_0[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO_0[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO_0[2]
@@ -149,10 +171,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO_1[32]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO_1[33]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO_1[34]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO_1[35]
-
-#============================================================
-# HEX0
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[2]
@@ -160,10 +178,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[3]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[4]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[5]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX0[6]
-
-#============================================================
-# HEX1
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX1[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX1[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX1[2]
@@ -171,10 +185,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX1[3]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX1[4]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX1[5]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX1[6]
-
-#============================================================
-# HEX2
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[2]
@@ -182,10 +192,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[3]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[4]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[5]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX2[6]
-
-#============================================================
-# HEX3
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[2]
@@ -193,10 +199,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[3]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[4]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[5]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX3[6]
-
-#============================================================
-# HEX4
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX4[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX4[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX4[2]
@@ -204,10 +206,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX4[3]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX4[4]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX4[5]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX4[6]
-
-#============================================================
-# HEX5
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX5[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX5[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX5[2]
@@ -215,18 +213,10 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX5[3]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX5[4]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX5[5]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HEX5[6]
-
-#============================================================
-# KEY
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY[2]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY[3]
-
-#============================================================
-# LEDR
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LEDR[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LEDR[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LEDR[2]
@@ -237,33 +227,17 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LEDR[6]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LEDR[7]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LEDR[8]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LEDR[9]
-
-#============================================================
-# PS2
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_CLK
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_CLK2
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_DAT
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to PS2_DAT2
-
-#============================================================
-# RESET
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to RESET_N
-
-#============================================================
-# SD
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_CLK
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_CMD
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DATA[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DATA[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DATA[2]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_DATA[3]
-
-#============================================================
-# SW
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[2]
@@ -274,10 +248,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[6]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[7]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[8]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SW[9]
-
-#============================================================
-# VGA
-#============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_B[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_B[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_B[2]
@@ -292,14 +262,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_R[1]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_R[2]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_R[3]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to VGA_VS
-
-#============================================================
-# End of pin assignments by Terasic System Builder
-#============================================================
-
-
-
-set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_location_assignment PIN_H13 -to CLOCK2_50
 set_location_assignment PIN_E10 -to CLOCK3_50
 set_location_assignment PIN_V15 -to CLOCK4_50
@@ -506,33 +468,4 @@ set_location_assignment PIN_B10 -to VGA_R[1]
 set_location_assignment PIN_C9 -to VGA_R[2]
 set_location_assignment PIN_A5 -to VGA_R[3]
 set_location_assignment PIN_G8 -to VGA_VS
-
-#============================================================
-
-
-
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
-
-set_global_assignment -name VHDL_FILE ../../project_config/types.vhd -library PROJECT_CONFIG
-set_global_assignment -name VHDL_FILE ../hardware/src/vga.vhd
-set_global_assignment -name VHDL_FILE ../hardware/src/mouse.vhd
-set_global_assignment -name VHDL_FILE bouncy_ball.vhd
-set_global_assignment -name VHDL_FILE ../top.vhd
-set_global_assignment -name OPTIMIZATION_TECHNIQUE SPEED
-set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS ON
-set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
-set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
-set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
-set_global_assignment -name STRATIXV_CONFIGURATION_SCHEME "ACTIVE SERIAL X1"
-set_global_assignment -name USE_CONFIGURATION_DEVICE ON
-set_global_assignment -name STRATIXII_CONFIGURATION_DEVICE EPCS64
-set_global_assignment -name CRC_ERROR_OPEN_DRAIN ON
-set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
-set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
-set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
-set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
-set_global_assignment -name ACTIVE_SERIAL_CLOCK FREQ_100MHZ
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
