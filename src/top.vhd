@@ -51,6 +51,7 @@ ARCHITECTURE rtl OF top IS
 
     SIGNAL key1_pressed : STD_LOGIC;
     SIGNAL key2_pressed : STD_LOGIC;
+    SIGNAL key3_pressed : STD_LOGIC;
 
     SIGNAL ball_red   : STD_LOGIC_VECTOR(3 DOWNTO 0);
     SIGNAL ball_green : STD_LOGIC_VECTOR(3 DOWNTO 0);
@@ -65,13 +66,13 @@ ARCHITECTURE rtl OF top IS
     SIGNAL vga_blue_4  : STD_LOGIC_VECTOR(3 DOWNTO 0);
     SIGNAL vga_vsync_1 : STD_LOGIC;
 
+    SIGNAL red_pattern   : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL green_pattern : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL blue_pattern  : STD_LOGIC_VECTOR(3 DOWNTO 0);
+
     -- Per-pixel masks for overlays drawn on top of the ball scene.
     SIGNAL player_on : STD_LOGIC;
     SIGNAL title_on  : STD_LOGIC;
-
-    -- KEY3 cycles this value; HEX4 shows it as a quick button sanity check.
-    SIGNAL mode_select : INTEGER RANGE 0 TO 3 := 0;
-    SIGNAL key3_prev   : STD_LOGIC := '1';
 
     -- Scientist cursor bitmap: 1 means draw the cursor at that pixel.
     CONSTANT PLAYER_WIDTH  : INTEGER := 21;
@@ -239,31 +240,20 @@ BEGIN
     reset <= NOT KEY(0);
     key1_pressed <= NOT KEY(1);
     key2_pressed <= NOT KEY(2);
+    key3_pressed <= NOT KEY(3);
 
     pixel_column <= STD_LOGIC_VECTOR(TO_UNSIGNED(screen_pos.pixel_x, pixel_column'LENGTH));
     pixel_row <= STD_LOGIC_VECTOR(TO_UNSIGNED(screen_pos.pixel_y, pixel_row'LENGTH));
 
+    -- Distinct per-channel test patterns.
+    -- With KEY1+KEY2+KEY3 pressed, the screen spans the full 12-bit RGB space.
+    red_pattern <= pixel_column(7 DOWNTO 4);
+    green_pattern <= pixel_row(7 DOWNTO 4);
+    blue_pattern <= pixel_column(3 DOWNTO 0) XOR pixel_row(3 DOWNTO 0);
+
     PROCESS (CLOCK_50) BEGIN
         IF RISING_EDGE(CLOCK_50) THEN
             clk25 <= NOT clk25;
-        END IF;
-    END PROCESS;
-
-    PROCESS (clk25, reset) BEGIN
-        IF reset = '1' THEN
-            mode_select <= 0;
-            key3_prev <= '1';
-        ELSIF RISING_EDGE(clk25) THEN
-            key3_prev <= KEY(3);
-
-            -- Detect one press, not every clock cycle while KEY3 is held.
-            IF key3_prev = '1' AND KEY(3) = '0' THEN
-                IF mode_select = 3 THEN
-                    mode_select <= 0;
-                ELSE
-                    mode_select <= mode_select + 1;
-                END IF;
-            END IF;
         END IF;
     END PROCESS;
 
@@ -356,20 +346,24 @@ BEGIN
         END IF;
     END PROCESS;
 
-    PROCESS (ball_red, ball_green, ball_blue, player_on, title_on, left_btn, right_btn) BEGIN
-        -- Overlay order: title first, then mouse cursor, then the ball/background scene.
-        IF title_on = '1' THEN
-            red_sig <= x"F";
-            green_sig <= x"F";
-            blue_sig <= x"F";
-        ELSIF player_on = '1' THEN
-            red_sig <= x"F";
-            green_sig <= (OTHERS => left_btn);
-            blue_sig <= (OTHERS => right_btn);
+    PROCESS (key1_pressed, key2_pressed, key3_pressed, red_pattern, green_pattern, blue_pattern) BEGIN
+        -- KEY1/KEY2/KEY3 independently enable R/G/B components.
+        IF key1_pressed = '1' THEN
+            red_sig <= red_pattern;
         ELSE
-            red_sig <= ball_red;
-            green_sig <= ball_green;
-            blue_sig <= ball_blue;
+            red_sig <= x"0";
+        END IF;
+
+        IF key2_pressed = '1' THEN
+            green_sig <= green_pattern;
+        ELSE
+            green_sig <= x"0";
+        END IF;
+
+        IF key3_pressed = '1' THEN
+            blue_sig <= blue_pattern;
+        ELSE
+            blue_sig <= x"0";
         END IF;
     END PROCESS;
 
@@ -395,12 +389,12 @@ BEGIN
     VGA_G <= vga_green_4;
     VGA_B <= vga_blue_4;
 
-    -- Debug display: low nibbles of mouse X/Y, KEY3 mode, and switch state.
+    -- Debug display: low nibbles of mouse X/Y, key RGB mask, and switch state.
     HEX0 <= hex7seg(mouse_col(3 DOWNTO 0));
     HEX1 <= hex7seg(mouse_col(7 DOWNTO 4));
     HEX2 <= hex7seg(mouse_row(3 DOWNTO 0));
     HEX3 <= hex7seg(mouse_row(7 DOWNTO 4));
-    HEX4 <= hex7seg(STD_LOGIC_VECTOR(TO_UNSIGNED(mode_select, 4)));
+    HEX4 <= hex7seg('0' & key3_pressed & key2_pressed & key1_pressed);
     HEX5 <= hex7seg(SW(3 DOWNTO 0));
 
     LEDR <= SW;
