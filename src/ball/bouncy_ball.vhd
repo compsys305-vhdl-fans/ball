@@ -19,15 +19,19 @@ architecture behavior of bouncy_ball is
 	SIGNAL mouse_on_ball	: std_logic;
 	SIGNAL prev_mouse_left	: std_logic := '0';
 	SIGNAL size 			: std_logic_vector(9 DOWNTO 0);  
+	-- Ball position is the centre point; motion is signed pixels per frame.
 	SIGNAL ball_y_pos		: std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(240,10);
 	SIGNAL ball_x_pos		: std_logic_vector(10 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(590,11);
 	SIGNAL ball_y_motion	: std_logic_vector(9 DOWNTO 0) := CONV_STD_LOGIC_VECTOR(2,10);
 	SIGNAL ball_x_motion	: std_logic_vector(10 DOWNTO 0) := (OTHERS => '0');
+	-- LFSR state used to choose one of four directions on a click.
 	SIGNAL random_bits		: std_logic_vector(7 DOWNTO 0) := "10101101";
 BEGIN
+	-- Half-size of the square ball in pixels.
 	size <= CONV_STD_LOGIC_VECTOR(8,10);
 	-- ball_x_pos and ball_y_pos show the (x,y) for the centre of ball
 
+	-- Current VGA pixel is inside the ball.
 	ball_on <= '1' when (
 			-- x_pos - size <= pixel_column <= x_pos + size
 			('0' & ball_x_pos <= '0' & pixel_column + size) and
@@ -37,6 +41,7 @@ BEGIN
 			('0' & pixel_row <= '0' & ball_y_pos + size)
 		) else '0';
 
+	-- Mouse pointer is inside the ball, independent of the current VGA pixel.
 	mouse_on_ball <= '1' when (
 			-- x_pos - size <= mouse_x <= x_pos + size
 			(CONV_INTEGER('0' & mouse_x) + CONV_INTEGER('0' & size) >= CONV_INTEGER(ball_x_pos)) and

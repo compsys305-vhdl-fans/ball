@@ -32,14 +32,17 @@ ENTITY top IS
 END top;
 
 ARCHITECTURE rtl OF top IS
+    -- Divide the DE0 50 MHz clock down to the 25 MHz VGA pixel clock.
     SIGNAL clk25 : STD_LOGIC := '0';
     SIGNAL reset : STD_LOGIC;
 
+    -- Current VGA pixel from the hardware VGA controller.
     SIGNAL screen_pos : SCREEN;
 
     SIGNAL pixel_row    : STD_LOGIC_VECTOR(9 DOWNTO 0);
     SIGNAL pixel_column : STD_LOGIC_VECTOR(9 DOWNTO 0);
 
+    -- Mouse coordinates are named as screen column/row for the draw code.
     SIGNAL mouse_row : STD_LOGIC_VECTOR(9 DOWNTO 0);
     SIGNAL mouse_col : STD_LOGIC_VECTOR(9 DOWNTO 0);
 
@@ -62,13 +65,18 @@ ARCHITECTURE rtl OF top IS
     SIGNAL vga_blue_1  : STD_LOGIC;
     SIGNAL vga_vsync_1 : STD_LOGIC;
 
+    -- Per-pixel masks for overlays drawn on top of the ball scene.
     SIGNAL player_on : STD_LOGIC;
     SIGNAL title_on  : STD_LOGIC;
 
+    -- KEY3 cycles this value; HEX4 shows it as a quick button sanity check.
     SIGNAL mode_select : INTEGER RANGE 0 TO 3 := 0;
     SIGNAL key3_prev   : STD_LOGIC := '1';
 
-    TYPE sprite_rom_t IS ARRAY (0 TO 32) OF STD_LOGIC_VECTOR(20 DOWNTO 0);
+    -- Scientist cursor bitmap: 1 means draw the cursor at that pixel.
+    CONSTANT PLAYER_WIDTH  : INTEGER := 21;
+    CONSTANT PLAYER_HEIGHT : INTEGER := 33;
+    TYPE sprite_rom_t IS ARRAY (0 TO PLAYER_HEIGHT - 1) OF STD_LOGIC_VECTOR(PLAYER_WIDTH - 1 DOWNTO 0);
 
     CONSTANT PLAYER_SPRITE : sprite_rom_t := (
         "111100000000000000000",
@@ -106,8 +114,8 @@ ARCHITECTURE rtl OF top IS
         "000000011111100000000"
     );
 
-    FUNCTION hex7seg(x : STD_LOGIC_VECTOR(3 DOWNTO 0)) RETURN STD_LOGIC_VECTOR IS
-    BEGIN
+    FUNCTION hex7seg(x : STD_LOGIC_VECTOR(3 DOWNTO 0)) RETURN STD_LOGIC_VECTOR IS BEGIN
+        -- Seven-segment outputs are active low on the DE0-CV board.
         CASE x IS
             WHEN "0000" => RETURN "1000000";
             WHEN "0001" => RETURN "1111001";
@@ -128,9 +136,8 @@ ARCHITECTURE rtl OF top IS
         END CASE;
     END FUNCTION hex7seg;
 
-    FUNCTION title_row(char_index : INTEGER; row_index : INTEGER)
-        RETURN STD_LOGIC_VECTOR IS
-    BEGIN
+    FUNCTION title_row(char_index : INTEGER; row_index : INTEGER) RETURN STD_LOGIC_VECTOR IS BEGIN
+        -- Tiny 5x7 bitmap font for "VHDL FANS".
         CASE char_index IS
             -- V
             WHEN 0 =>
@@ -228,6 +235,7 @@ ARCHITECTURE rtl OF top IS
         END CASE;
     END FUNCTION title_row;
 BEGIN
+    -- DE0 pushbuttons are active low, so invert them at the boundary.
     reset <= NOT KEY(0);
     key1_pressed <= NOT KEY(1);
     key2_pressed <= NOT KEY(2);
@@ -235,21 +243,20 @@ BEGIN
     pixel_column <= STD_LOGIC_VECTOR(TO_UNSIGNED(screen_pos.pixel_x, pixel_column'LENGTH));
     pixel_row <= STD_LOGIC_VECTOR(TO_UNSIGNED(screen_pos.pixel_y, pixel_row'LENGTH));
 
-    PROCESS (CLOCK_50)
-    BEGIN
+    PROCESS (CLOCK_50) BEGIN
         IF RISING_EDGE(CLOCK_50) THEN
             clk25 <= NOT clk25;
         END IF;
     END PROCESS;
 
-    PROCESS (clk25, reset)
-    BEGIN
+    PROCESS (clk25, reset) BEGIN
         IF reset = '1' THEN
             mode_select <= 0;
             key3_prev <= '1';
         ELSIF RISING_EDGE(clk25) THEN
             key3_prev <= KEY(3);
 
+            -- Detect one press, not every clock cycle while KEY3 is held.
             IF key3_prev = '1' AND KEY(3) = '0' THEN
                 IF mode_select = 3 THEN
                     mode_select <= 0;
@@ -304,12 +311,12 @@ BEGIN
 
         player_on <= '0';
 
-        IF (px >= mx) AND (px < mx + 32) AND
-           (py >= my) AND (py < my + 19) THEN
+        IF (px >= mx) AND (px < mx + PLAYER_WIDTH) AND
+           (py >= my) AND (py < my + PLAYER_HEIGHT) THEN
             sx := px - mx;
             sy := py - my;
 
-            IF PLAYER_SPRITE(sy)(31 - sx) = '1' THEN
+            IF PLAYER_SPRITE(sy)(PLAYER_WIDTH - 1 - sx) = '1' THEN
                 player_on <= '1';
             END IF;
         END IF;
@@ -330,6 +337,7 @@ BEGIN
 
         title_on <= '0';
 
+        -- Draw each 5x7 font pixel as a 2x2 block with blank columns between letters.
         IF (px >= 40) AND (px < 148) AND
            (py >= 40) AND (py < 54) THEN
             rx := px - 40;
@@ -348,8 +356,8 @@ BEGIN
         END IF;
     END PROCESS;
 
-    PROCESS (ball_red, ball_green, ball_blue, player_on, title_on, left_btn, right_btn)
-    BEGIN
+    PROCESS (ball_red, ball_green, ball_blue, player_on, title_on, left_btn, right_btn) BEGIN
+        -- Overlay order: title first, then mouse cursor, then the ball/background scene.
         IF title_on = '1' THEN
             red_sig <= '1';
             green_sig <= '1';
@@ -382,10 +390,12 @@ BEGIN
 
     VGA_VS <= vga_vsync_1;
 
+    -- The project uses one color bit internally; fan it out to the 4 VGA pins.
     VGA_R <= (OTHERS => vga_red_1);
     VGA_G <= (OTHERS => vga_green_1);
     VGA_B <= (OTHERS => vga_blue_1);
 
+    -- Debug display: low nibbles of mouse X/Y, KEY3 mode, and switch state.
     HEX0 <= hex7seg(mouse_col(3 DOWNTO 0));
     HEX1 <= hex7seg(mouse_col(7 DOWNTO 4));
     HEX2 <= hex7seg(mouse_row(3 DOWNTO 0));
