@@ -346,8 +346,9 @@ BEGIN
         END IF;
     END PROCESS;
 
-    PROCESS (key1_pressed, key2_pressed, key3_pressed, red_pattern, green_pattern, blue_pattern) BEGIN
-        -- KEY1/KEY2/KEY3 independently enable R/G/B components.
+    PROCESS (key1_pressed, key2_pressed, key3_pressed, red_pattern, green_pattern, blue_pattern,
+             ball_red, ball_green, ball_blue, player_on, title_on, left_btn, right_btn) BEGIN
+        -- Base layer: button-controlled RGB test pattern.
         IF key1_pressed = '1' THEN
             red_sig <= red_pattern;
         ELSE
@@ -364,6 +365,21 @@ BEGIN
             blue_sig <= blue_pattern;
         ELSE
             blue_sig <= x"0";
+        END IF;
+
+        -- Overlay order: title, then mouse cursor, then ball.
+        IF title_on = '1' THEN
+            red_sig <= x"F";
+            green_sig <= x"F";
+            blue_sig <= x"F";
+        ELSIF player_on = '1' THEN
+            red_sig <= x"F";
+            green_sig <= (OTHERS => left_btn);
+            blue_sig <= (OTHERS => right_btn);
+        ELSIF (ball_red /= x"0") OR (ball_green /= x"0") OR (ball_blue /= x"0") THEN
+            red_sig <= ball_red;
+            green_sig <= ball_green;
+            blue_sig <= ball_blue;
         END IF;
     END PROCESS;
 
