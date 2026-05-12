@@ -5,7 +5,7 @@
 
 set_global_assignment -name FAMILY "Cyclone V"
 set_global_assignment -name DEVICE 5CEBA4F23C7
-set_global_assignment -name TOP_LEVEL_ENTITY "DE0_CV_Default"
+set_global_assignment -name TOP_LEVEL_ENTITY "top"
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13
 set_global_assignment -name LAST_QUARTUS_VERSION 14.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "MON MAY  5 11:54:18 2014"
@@ -516,16 +516,11 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
 
-set_global_assignment -name VERILOG_FILE V/video_sync_generator.v
-set_global_assignment -name VERILOG_FILE V/vga_controller.v
-set_global_assignment -name VERILOG_FILE V/SEG7_LUT_6.v
-set_global_assignment -name VERILOG_FILE V/SEG7_LUT.v
-set_global_assignment -name VERILOG_FILE V/Reset_Delay.v
-set_global_assignment -name QIP_FILE V/img_index.qip
-set_global_assignment -name QIP_FILE V/img_data.qip
-set_global_assignment -name QIP_FILE V/vga_pll.qip
-set_global_assignment -name SIP_FILE V/vga_pll.sip
-set_global_assignment -name SDC_FILE DE0_CV_Default.sdc
+set_global_assignment -name VHDL_FILE ../../project_config/types.vhd -library PROJECT_CONFIG
+set_global_assignment -name VHDL_FILE ../hardware/src/vga.vhd
+set_global_assignment -name VHDL_FILE ../hardware/src/mouse.vhd
+set_global_assignment -name VHDL_FILE bouncy_ball.vhd
+set_global_assignment -name VHDL_FILE ../top.vhd
 set_global_assignment -name OPTIMIZATION_TECHNIQUE SPEED
 set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS ON
 set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
