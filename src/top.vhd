@@ -189,6 +189,13 @@ ARCHITECTURE rtl OF top IS
                 RETURN "00000";
             -- F
             WHEN 5 =>
+					 CASE row_index IS
+					    WHEN 0 => RETURN "01010";
+						 WHEN 1 => RETURN "01010";
+						 WHEN 2 => RETURN "01010";
+						 WHEN OTHERS => RETURN "00000";
+					 END CASE;
+            WHEN 6 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "11111";
                     WHEN 1 => RETURN "10000";
@@ -199,7 +206,7 @@ ARCHITECTURE rtl OF top IS
                     WHEN OTHERS => RETURN "10000";
                 END CASE;
             -- A
-            WHEN 6 =>
+            WHEN 7 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "01110";
                     WHEN 1 => RETURN "10001";
@@ -210,7 +217,7 @@ ARCHITECTURE rtl OF top IS
                     WHEN OTHERS => RETURN "10001";
                 END CASE;
             -- N
-            WHEN 7 =>
+            WHEN 8 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "10001";
                     WHEN 1 => RETURN "11001";
@@ -221,7 +228,7 @@ ARCHITECTURE rtl OF top IS
                     WHEN OTHERS => RETURN "10001";
                 END CASE;
             -- S
-            WHEN 8 =>
+            WHEN 9 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "01111";
                     WHEN 1 => RETURN "10000";
@@ -231,6 +238,13 @@ ARCHITECTURE rtl OF top IS
                     WHEN 5 => RETURN "00001";
                     WHEN OTHERS => RETURN "11110";
                 END CASE;
+				WHEN 10 =>
+					 CASE row_index IS
+					    WHEN 0 => RETURN "01010";
+						 WHEN 1 => RETURN "01010";
+						 WHEN 2 => RETURN "01010";
+						 WHEN OTHERS => RETURN "00000";
+					 END CASE;
             WHEN OTHERS =>
                 RETURN "00000";
         END CASE;
@@ -328,7 +342,7 @@ BEGIN
         title_on <= '0';
 
         -- Draw each 5x7 font pixel as a 2x2 block with blank columns between letters.
-        IF (px >= 40) AND (px < 148) AND
+        IF (px >= 40) AND (px < 184) AND
            (py >= 40) AND (py < 54) THEN
             rx := px - 40;
             ry := py - 40;
