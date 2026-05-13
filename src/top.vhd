@@ -347,49 +347,50 @@ BEGIN
     END PROCESS;
 
     PROCESS (key1_pressed, key2_pressed, key3_pressed, red_pattern, green_pattern, blue_pattern,
-             ball_red, ball_green, ball_blue, player_on, title_on, left_btn, right_btn) BEGIN
-        IF (key1_pressed = '0') AND (key2_pressed = '0') AND (key3_pressed = '0') THEN
-            red_sig <= x"0";
-            green_sig <= x"0";
-            blue_sig <= x"0";
-        END IF;
+             ball_red, ball_green, ball_blue, player_on, title_on, left_btn, right_btn)
+        VARIABLE r_next : STD_LOGIC_VECTOR(3 DOWNTO 0);
+        VARIABLE g_next : STD_LOGIC_VECTOR(3 DOWNTO 0);
+        VARIABLE b_next : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    BEGIN
+        -- Default background.
+        r_next := x"0";
+        g_next := x"0";
+        b_next := x"0";
 
         -- Base layer: button-controlled RGB test pattern.
         IF key1_pressed = '1' THEN
-            red_sig <= red_pattern;
-        ELSE
-            red_sig <= x"0";
+            r_next := red_pattern;
         END IF;
 
         IF key2_pressed = '1' THEN
-            green_sig <= green_pattern;
-        ELSE
-            green_sig <= x"0";
+            g_next := green_pattern;
         END IF;
 
         IF key3_pressed = '1' THEN
-            blue_sig <= blue_pattern;
-        ELSE
-            blue_sig <= x"0";
+            b_next := blue_pattern;
         END IF;
 
-        -- Overlay order:  mouse cursor, then ball.
+        -- Overlay order: mouse cursor, then ball.
         IF player_on = '1' THEN
-            red_sig <= x"F";
-            green_sig <= (OTHERS => left_btn);
-            blue_sig <= (OTHERS => right_btn);
+            r_next := x"F";
+            g_next := (OTHERS => left_btn);
+            b_next := (OTHERS => right_btn);
         ELSIF (ball_red /= x"0") OR (ball_green /= x"0") OR (ball_blue /= x"0") THEN
-            red_sig <= ball_red;
-            green_sig <= ball_green;
-            blue_sig <= ball_blue;
+            r_next := ball_red;
+            g_next := ball_green;
+            b_next := ball_blue;
         END IF;
 
         -- The title should invert the colour of the pixel below it.
         IF title_on = '1' THEN
-            red_sig <= NOT red_sig;
-            green_sig <= NOT green_sig;
-            blue_sig <= NOT blue_sig;
+            r_next := NOT r_next;
+            g_next := NOT g_next;
+            b_next := NOT b_next;
         END IF;
+
+        red_sig <= r_next;
+        green_sig <= g_next;
+        blue_sig <= b_next;
     END PROCESS;
 
     vga_inst : ENTITY work.vga
