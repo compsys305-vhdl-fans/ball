@@ -348,6 +348,12 @@ BEGIN
 
     PROCESS (key1_pressed, key2_pressed, key3_pressed, red_pattern, green_pattern, blue_pattern,
              ball_red, ball_green, ball_blue, player_on, title_on, left_btn, right_btn) BEGIN
+        IF (key1_pressed = '0') AND (key2_pressed = '0') AND (key3_pressed = '0') THEN
+            red_sig <= x"0";
+            green_sig <= x"0";
+            blue_sig <= x"0";
+        END IF;
+
         -- Base layer: button-controlled RGB test pattern.
         IF key1_pressed = '1' THEN
             red_sig <= red_pattern;
