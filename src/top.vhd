@@ -358,7 +358,7 @@ BEGIN
                 END IF;
             END IF;
         END IF;
-        IF (px >= 40) AND (px < (148 - 40) * 2 + 40) AND
+        IF (px >= 40) AND (px < (184 - 40) * 2 + 40) AND
            (py >= 100) AND (py < (54 - 40) * 2 + 100) THEN
             rx := px - 40;
             ry := py - 100;
