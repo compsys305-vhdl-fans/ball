@@ -367,12 +367,8 @@ BEGIN
             blue_sig <= x"0";
         END IF;
 
-        -- Overlay order: title, then mouse cursor, then ball.
-        IF title_on = '1' THEN
-            red_sig <= x"F";
-            green_sig <= x"F";
-            blue_sig <= x"F";
-        ELSIF player_on = '1' THEN
+        -- Overlay order:  mouse cursor, then ball.
+        IF player_on = '1' THEN
             red_sig <= x"F";
             green_sig <= (OTHERS => left_btn);
             blue_sig <= (OTHERS => right_btn);
@@ -380,6 +376,13 @@ BEGIN
             red_sig <= ball_red;
             green_sig <= ball_green;
             blue_sig <= ball_blue;
+        END IF;
+
+        -- The title should invert the colour of the pixel below it.
+        IF title_on = '1' THEN
+            red_sig <= NOT red_sig;
+            green_sig <= NOT green_sig;
+            blue_sig <= NOT blue_sig;
         END IF;
     END PROCESS;
 
