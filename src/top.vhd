@@ -358,6 +358,22 @@ BEGIN
                 END IF;
             END IF;
         END IF;
+        IF (px >= 40) AND (px < (148 - 40) * 2 + 40) AND
+           (py >= 100) AND (py < (54 - 40) * 2 + 100) THEN
+            rx := px - 40;
+            ry := py - 100;
+            char_idx := rx / 24;
+            glyph_col := (rx MOD 24) / 4;
+            glyph_row := ry / 4;
+
+            IF glyph_col < 5 THEN
+                glyph := title_row(char_idx, glyph_row);
+
+                IF glyph(4 - glyph_col) = '1' THEN
+                    title_on <= '1';
+                END IF;
+            END IF;
+        END IF;
     END PROCESS;
 
     PROCESS (key1_pressed, key2_pressed, key3_pressed, red_pattern, green_pattern, blue_pattern,
