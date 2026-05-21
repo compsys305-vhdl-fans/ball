@@ -32,17 +32,15 @@ ENTITY top IS
 END top;
 
 ARCHITECTURE rtl OF top IS
-    -- Divide the DE0 50 MHz clock down to the 25 MHz VGA pixel clock.
+
     SIGNAL clk25 : STD_LOGIC := '0';
     SIGNAL reset : STD_LOGIC;
 
-    -- Current VGA pixel from the hardware VGA controller.
     SIGNAL screen_pos : SCREEN;
 
     SIGNAL pixel_row    : STD_LOGIC_VECTOR(9 DOWNTO 0);
     SIGNAL pixel_column : STD_LOGIC_VECTOR(9 DOWNTO 0);
 
-    -- Mouse coordinates are named as screen column/row for the draw code.
     SIGNAL mouse_row : STD_LOGIC_VECTOR(9 DOWNTO 0);
     SIGNAL mouse_col : STD_LOGIC_VECTOR(9 DOWNTO 0);
 
@@ -70,13 +68,23 @@ ARCHITECTURE rtl OF top IS
     SIGNAL green_pattern : STD_LOGIC_VECTOR(3 DOWNTO 0);
     SIGNAL blue_pattern  : STD_LOGIC_VECTOR(3 DOWNTO 0);
 
-    -- Per-pixel masks for overlays drawn on top of the ball scene.
     SIGNAL player_on : STD_LOGIC;
     SIGNAL title_on  : STD_LOGIC;
 
-    -- Scientist cursor bitmap: 1 means draw the cursor at that pixel.
+    -- Background ROM
+    CONSTANT BG_WIDTH  : INTEGER := 256;
+    CONSTANT BG_HEIGHT : INTEGER := 480;
+
+    SIGNAL bg_addr  : STD_LOGIC_VECTOR(16 DOWNTO 0);
+    SIGNAL bg_pixel : STD_LOGIC_VECTOR(11 DOWNTO 0);
+
+    SIGNAL scroll_x : INTEGER RANGE 0 TO BG_WIDTH - 1 := 0;
+    SIGNAL prev_vsync : STD_LOGIC := '1';
+
+    -- Scientist cursor bitmap
     CONSTANT PLAYER_WIDTH  : INTEGER := 21;
     CONSTANT PLAYER_HEIGHT : INTEGER := 33;
+
     TYPE sprite_rom_t IS ARRAY (0 TO PLAYER_HEIGHT - 1) OF STD_LOGIC_VECTOR(PLAYER_WIDTH - 1 DOWNTO 0);
 
     CONSTANT PLAYER_SPRITE : sprite_rom_t := (
@@ -115,8 +123,8 @@ ARCHITECTURE rtl OF top IS
         "000000011111100000000"
     );
 
-    FUNCTION hex7seg(x : STD_LOGIC_VECTOR(3 DOWNTO 0)) RETURN STD_LOGIC_VECTOR IS BEGIN
-        -- Seven-segment outputs are active low on the DE0-CV board.
+    FUNCTION hex7seg(x : STD_LOGIC_VECTOR(3 DOWNTO 0)) RETURN STD_LOGIC_VECTOR IS
+    BEGIN
         CASE x IS
             WHEN "0000" => RETURN "1000000";
             WHEN "0001" => RETURN "1111001";
@@ -135,12 +143,11 @@ ARCHITECTURE rtl OF top IS
             WHEN "1110" => RETURN "0000110";
             WHEN OTHERS => RETURN "0001110";
         END CASE;
-    END FUNCTION hex7seg;
+    END FUNCTION;
 
-    FUNCTION title_row(char_index : INTEGER; row_index : INTEGER) RETURN STD_LOGIC_VECTOR IS BEGIN
-        -- Tiny 5x7 bitmap font for "VHDL FANS".
+    FUNCTION title_row(char_index : INTEGER; row_index : INTEGER) RETURN STD_LOGIC_VECTOR IS
+    BEGIN
         CASE char_index IS
-            -- V
             WHEN 0 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "10001";
@@ -151,7 +158,6 @@ ARCHITECTURE rtl OF top IS
                     WHEN 5 => RETURN "01010";
                     WHEN OTHERS => RETURN "00100";
                 END CASE;
-            -- H
             WHEN 1 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "10001";
@@ -162,7 +168,6 @@ ARCHITECTURE rtl OF top IS
                     WHEN 5 => RETURN "10001";
                     WHEN OTHERS => RETURN "10001";
                 END CASE;
-            -- D
             WHEN 2 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "11110";
@@ -173,7 +178,6 @@ ARCHITECTURE rtl OF top IS
                     WHEN 5 => RETURN "10001";
                     WHEN OTHERS => RETURN "11110";
                 END CASE;
-            -- L
             WHEN 3 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "10000";
@@ -184,17 +188,15 @@ ARCHITECTURE rtl OF top IS
                     WHEN 5 => RETURN "10000";
                     WHEN OTHERS => RETURN "11111";
                 END CASE;
-            -- Space
             WHEN 4 =>
                 RETURN "00000";
-            -- F
             WHEN 5 =>
-					 CASE row_index IS
-					    WHEN 0 => RETURN "01010";
-						 WHEN 1 => RETURN "01010";
-						 WHEN 2 => RETURN "01010";
-						 WHEN OTHERS => RETURN "00000";
-					 END CASE;
+                CASE row_index IS
+                    WHEN 0 => RETURN "01010";
+                    WHEN 1 => RETURN "01010";
+                    WHEN 2 => RETURN "01010";
+                    WHEN OTHERS => RETURN "00000";
+                END CASE;
             WHEN 6 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "11111";
@@ -205,7 +207,6 @@ ARCHITECTURE rtl OF top IS
                     WHEN 5 => RETURN "10000";
                     WHEN OTHERS => RETURN "10000";
                 END CASE;
-            -- A
             WHEN 7 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "01110";
@@ -216,7 +217,6 @@ ARCHITECTURE rtl OF top IS
                     WHEN 5 => RETURN "10001";
                     WHEN OTHERS => RETURN "10001";
                 END CASE;
-            -- N
             WHEN 8 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "10001";
@@ -227,7 +227,6 @@ ARCHITECTURE rtl OF top IS
                     WHEN 5 => RETURN "10001";
                     WHEN OTHERS => RETURN "10001";
                 END CASE;
-            -- S
             WHEN 9 =>
                 CASE row_index IS
                     WHEN 0 => RETURN "01111";
@@ -238,36 +237,52 @@ ARCHITECTURE rtl OF top IS
                     WHEN 5 => RETURN "00001";
                     WHEN OTHERS => RETURN "11110";
                 END CASE;
-				WHEN 10 =>
-					 CASE row_index IS
-					    WHEN 0 => RETURN "01010";
-						 WHEN 1 => RETURN "01010";
-						 WHEN 2 => RETURN "01010";
-						 WHEN OTHERS => RETURN "00000";
-					 END CASE;
+            WHEN 10 =>
+                CASE row_index IS
+                    WHEN 0 => RETURN "01010";
+                    WHEN 1 => RETURN "01010";
+                    WHEN 2 => RETURN "01010";
+                    WHEN OTHERS => RETURN "00000";
+                END CASE;
             WHEN OTHERS =>
                 RETURN "00000";
         END CASE;
-    END FUNCTION title_row;
+    END FUNCTION;
+
 BEGIN
-    -- DE0 pushbuttons are active low, so invert them at the boundary.
+
     reset <= NOT KEY(0);
     key1_pressed <= NOT KEY(1);
     key2_pressed <= NOT KEY(2);
     key3_pressed <= NOT KEY(3);
 
     pixel_column <= STD_LOGIC_VECTOR(TO_UNSIGNED(screen_pos.pixel_x, pixel_column'LENGTH));
-    pixel_row <= STD_LOGIC_VECTOR(TO_UNSIGNED(screen_pos.pixel_y, pixel_row'LENGTH));
+    pixel_row    <= STD_LOGIC_VECTOR(TO_UNSIGNED(screen_pos.pixel_y, pixel_row'LENGTH));
 
-    -- Distinct per-channel test patterns.
-    -- With KEY1+KEY2+KEY3 pressed, the screen spans the full 12-bit RGB space.
-    red_pattern <= pixel_column(7 DOWNTO 4);
+    red_pattern   <= pixel_column(7 DOWNTO 4);
     green_pattern <= pixel_row(7 DOWNTO 4);
-    blue_pattern <= pixel_column(3 DOWNTO 0) XOR pixel_row(3 DOWNTO 0);
+    blue_pattern  <= pixel_column(3 DOWNTO 0) XOR pixel_row(3 DOWNTO 0);
 
-    PROCESS (CLOCK_50) BEGIN
+    PROCESS (CLOCK_50)
+    BEGIN
         IF RISING_EDGE(CLOCK_50) THEN
             clk25 <= NOT clk25;
+        END IF;
+    END PROCESS;
+
+    -- Scroll once per VSYNC falling edge
+    PROCESS(clk25)
+    BEGIN
+        IF RISING_EDGE(clk25) THEN
+            prev_vsync <= vga_vsync_1;
+
+            IF prev_vsync = '1' AND vga_vsync_1 = '0' THEN
+                IF scroll_x = BG_WIDTH - 1 THEN
+                    scroll_x <= 0;
+                ELSE
+                    scroll_x <= scroll_x + 1;
+                END IF;
+            END IF;
         END IF;
     END PROCESS;
 
@@ -300,6 +315,28 @@ BEGIN
             blue         => ball_blue
         );
 
+    bg_rom_inst : ENTITY work.background_rom
+        PORT MAP (
+            clk  => clk25,
+            addr => bg_addr,
+            q    => bg_pixel
+        );
+
+    PROCESS (pixel_column, pixel_row, scroll_x)
+        VARIABLE px   : INTEGER;
+        VARIABLE py   : INTEGER;
+        VARIABLE bg_x : INTEGER;
+        VARIABLE addr : INTEGER;
+    BEGIN
+        px := TO_INTEGER(UNSIGNED(pixel_column));
+        py := TO_INTEGER(UNSIGNED(pixel_row));
+
+        bg_x := (px + scroll_x) MOD BG_WIDTH;
+        addr := py * BG_WIDTH + bg_x;
+
+        bg_addr <= STD_LOGIC_VECTOR(TO_UNSIGNED(addr, 17));
+    END PROCESS;
+
     PROCESS (pixel_column, pixel_row, mouse_col, mouse_row)
         VARIABLE px : INTEGER;
         VARIABLE py : INTEGER;
@@ -317,6 +354,7 @@ BEGIN
 
         IF (px >= mx) AND (px < mx + PLAYER_WIDTH) AND
            (py >= my) AND (py < my + PLAYER_HEIGHT) THEN
+
             sx := px - mx;
             sy := py - my;
 
@@ -341,9 +379,9 @@ BEGIN
 
         title_on <= '0';
 
-        -- Draw each 5x7 font pixel as a 2x2 block with blank columns between letters.
         IF (px >= 40) AND (px < 184) AND
            (py >= 40) AND (py < 54) THEN
+
             rx := px - 40;
             ry := py - 40;
             char_idx := rx / 12;
@@ -358,8 +396,10 @@ BEGIN
                 END IF;
             END IF;
         END IF;
+
         IF (px >= 40) AND (px < (184 - 40) * 2 + 40) AND
            (py >= 100) AND (py < (54 - 40) * 2 + 100) THEN
+
             rx := px - 40;
             ry := py - 100;
             char_idx := rx / 24;
@@ -376,18 +416,23 @@ BEGIN
         END IF;
     END PROCESS;
 
-    PROCESS (key1_pressed, key2_pressed, key3_pressed, red_pattern, green_pattern, blue_pattern,
-             ball_red, ball_green, ball_blue, player_on, title_on, left_btn, right_btn)
+    PROCESS (
+        key1_pressed, key2_pressed, key3_pressed,
+        red_pattern, green_pattern, blue_pattern,
+        ball_red, ball_green, ball_blue,
+        player_on, title_on, left_btn, right_btn,
+        bg_pixel
+    )
         VARIABLE r_next : STD_LOGIC_VECTOR(3 DOWNTO 0);
         VARIABLE g_next : STD_LOGIC_VECTOR(3 DOWNTO 0);
         VARIABLE b_next : STD_LOGIC_VECTOR(3 DOWNTO 0);
     BEGIN
-        -- Default background.
-        r_next := x"0";
-        g_next := x"0";
-        b_next := x"0";
+        -- Background from ROM
+        r_next := bg_pixel(11 DOWNTO 8);
+        g_next := bg_pixel(7 DOWNTO 4);
+        b_next := bg_pixel(3 DOWNTO 0);
 
-        -- Base layer: button-controlled RGB test pattern.
+        -- Optional RGB test overlay from keys
         IF key1_pressed = '1' THEN
             r_next := red_pattern;
         END IF;
@@ -400,27 +445,28 @@ BEGIN
             b_next := blue_pattern;
         END IF;
 
-        -- Overlay order: mouse cursor, then ball.
+        -- Player / ball overlays
         IF player_on = '1' THEN
             r_next := x"F";
             g_next := (OTHERS => left_btn);
             b_next := (OTHERS => right_btn);
+
         ELSIF (ball_red /= x"0") OR (ball_green /= x"0") OR (ball_blue /= x"0") THEN
             r_next := ball_red;
             g_next := ball_green;
             b_next := ball_blue;
         END IF;
 
-        -- The title should invert the colour of the pixel below it.
+        -- Title invert
         IF title_on = '1' THEN
             r_next := NOT r_next;
             g_next := NOT g_next;
             b_next := NOT b_next;
         END IF;
 
-        red_sig <= r_next;
+        red_sig   <= r_next;
         green_sig <= g_next;
-        blue_sig <= b_next;
+        blue_sig  <= b_next;
     END PROCESS;
 
     vga_inst : ENTITY work.vga
@@ -440,12 +486,10 @@ BEGIN
 
     VGA_VS <= vga_vsync_1;
 
-    -- Drive the full 4-bit VGA DAC.
     VGA_R <= vga_red_4;
     VGA_G <= vga_green_4;
     VGA_B <= vga_blue_4;
 
-    -- Debug display: low nibbles of mouse X/Y, key RGB mask, and switch state.
     HEX0 <= hex7seg(mouse_col(3 DOWNTO 0));
     HEX1 <= hex7seg(mouse_col(7 DOWNTO 4));
     HEX2 <= hex7seg(mouse_row(3 DOWNTO 0));
@@ -454,4 +498,5 @@ BEGIN
     HEX5 <= hex7seg(SW(3 DOWNTO 0));
 
     LEDR <= SW;
+
 END rtl;
